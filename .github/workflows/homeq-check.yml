@@ -21,6 +21,18 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
+      # Run logs are public in a public repo. GitHub masks each secret's whole value, but ALERT_EMAIL_TO
+      # holds several addresses, so also mask every single address in case one is printed on its own.
+      - name: Hide email addresses in logs
+        env:
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+        run: |
+          for a in $(printf '%s,%s' "$ALERT_EMAIL_TO" "$MAIL_USERNAME" | tr ',' ' '); do
+            [ -n "$a" ] && echo "::add-mask::$a"
+          done
+          echo "Email addresses masked"
+
       - uses: actions/checkout@v5
 
       - uses: actions/setup-java@v5
