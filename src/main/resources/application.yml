@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: homeq-rental-alert
+  datasource:
+    url: jdbc:h2:file:./data/homeq-alert
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  # Email alerts (default channel). Gmail: use an App Password, not your normal password.
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 15000
+      mail.smtp.timeout: 15000
+      mail.smtp.writetimeout: 15000
+
+alert:
+  # Comma-separated: email, callmebot (free WhatsApp to yourself), twilio (Twilio WhatsApp, needs paid account)
+  channels: ${ALERT_CHANNELS:email}
+  # Where email alerts go; comma-separate several addresses.
+  email-to: ${ALERT_EMAIL_TO:}
+
+callmebot:
+  # Your WhatsApp number with country code, e.g. +919645814799
+  phone: ${CALLMEBOT_PHONE:}
+  api-key: ${CALLMEBOT_API_KEY:}
+
+homeq:
+  search-url: ${HOMEQ_SEARCH_URL:https://www.homeq.se/}
+  # Selectors verified against homeq.se search results on 2026-11-13. Each card is an <a href="/lagenhet/...">.
+  card-selector: "${HOMEQ_CARD_SELECTOR:a[href*='/lagenhet/']}"
+  title-selector: "${HOMEQ_TITLE_SELECTOR:p.title}"
+  price-selector: "${HOMEQ_PRICE_SELECTOR:p:has-text('kr/m')}"
+  area-selector: "${HOMEQ_AREA_SELECTOR:p.body-small}"
+  rooms-selector: "${HOMEQ_ROOMS_SELECTOR:p:text-matches('[0-9]+ rum')}"
+  link-selector: "${HOMEQ_LINK_SELECTOR::scope}"
+  allowed-areas: ${HOMEQ_ALLOWED_AREAS:}
+  # 0 disables the filter.
+  min-rooms: ${HOMEQ_MIN_ROOMS:0}
+  max-rent: ${HOMEQ_MAX_RENT:0}
+  # HomeQ shows ~20 cards per page; read up to this many pages per poll.
+  max-pages: ${HOMEQ_MAX_PAGES:5}
+  poll-interval-ms: ${HOMEQ_POLL_INTERVAL_MS:600000}
+  # true = do one check and exit (used by GitHub Actions); false = keep running and check every poll interval.
+  run-once: ${HOMEQ_RUN_ONCE:false}
+  initial-delay-ms: 15000
+  headless: ${HOMEQ_HEADLESS:true}
+  # When the seen-listings DB is empty, record current listings silently instead of alerting on all of them.
+  baseline-on-first-run: ${HOMEQ_BASELINE_ON_FIRST_RUN:true}
+  # How long to wait for the first listing card to render before giving up on this poll.
+  card-wait-timeout-ms: ${HOMEQ_CARD_WAIT_TIMEOUT_MS:30000}
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:}
+  auth-token: ${TWILIO_AUTH_TOKEN:}
+  whatsapp-from: ${TWILIO_WHATSAPP_FROM:}
+  whatsapp-to: ${WHATSAPP_TO:}
+
+logging:
+  level:
+    com.homeq.alert: INFO

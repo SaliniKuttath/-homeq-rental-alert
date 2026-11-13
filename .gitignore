@@ -1,0 +1,12 @@
+target/
+.idea/
+.vscode/
+*.iml
+.env
+*.db
+*.mv.db
+*.trace.db
+playwright/.cache/
+.DS_Store
+data/
+.claude/settings.local.json
