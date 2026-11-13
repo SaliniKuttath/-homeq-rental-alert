@@ -1,11 +1,13 @@
 name: HomeQ check
 
 # Runs one HomeQ check on GitHub's servers, so alerts work while your PC is off.
-# Times are UTC. ":17" avoids the busy top of the hour, when GitHub often delays scheduled runs.
-# Free private-repo budget is 2,000 min/month; one run takes ~2 min, so hourly ≈ 1,500 min/month.
+# Every 10 minutes (offset to :02, :12, ... to avoid the busy :00). GitHub may delay busy schedules a few minutes.
+# This repo is PUBLIC, so Actions minutes are free and unlimited. If it's ever made private again,
+# change back to hourly ('17 * * * *'): every 10 min would use ~8,600 of the 2,000 free private minutes/month.
+# Note: GitHub pauses schedules in public repos after 60 days without commits; it emails you to re-enable.
 on:
   schedule:
-    - cron: '17 * * * *'
+    - cron: '2-59/10 * * * *'
   workflow_dispatch:   # "Run workflow" button for manual tests
 
 permissions:
