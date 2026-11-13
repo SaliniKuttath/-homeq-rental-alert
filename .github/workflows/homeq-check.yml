@@ -49,6 +49,15 @@ jobs:
           key: homeq-seen-${{ github.run_id }}
           restore-keys: homeq-seen-
 
+      # Optional: your saved HomeQ login (secret HOMEQ_SESSION, renewed weekly by scripts/update-homeq-login.ps1)
+      # lets alerts include your queue position. It's written only for this run and deleted before caching.
+      - name: Load HomeQ login
+        env:
+          HOMEQ_SESSION: ${{ secrets.HOMEQ_SESSION }}
+        run: |
+          mkdir -p data
+          if [ -n "$HOMEQ_SESSION" ]; then printf '%s' "$HOMEQ_SESSION" > data/homeq-session.json; echo "HomeQ login loaded"; else echo "No HomeQ login secret: queue positions off"; fi
+
       - name: Check HomeQ and send alerts
         env:
           HOMEQ_RUN_ONCE: 'true'
@@ -67,6 +76,10 @@ jobs:
           CALLMEBOT_PHONE: ${{ secrets.CALLMEBOT_PHONE }}
           CALLMEBOT_API_KEY: ${{ secrets.CALLMEBOT_API_KEY }}
         run: java -jar target/homeq-rental-alert-*.jar
+
+      - name: Remove HomeQ login before caching
+        if: always()
+        run: rm -f data/homeq-session.json
 
       - name: Save seen-listings database
         if: always() && hashFiles('data/**') != ''
