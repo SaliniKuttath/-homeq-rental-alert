@@ -25,15 +25,21 @@ jobs:
     steps:
       # Run logs are public in a public repo. GitHub masks each secret's whole value, but ALERT_EMAIL_TO
       # holds several addresses, so also mask every single address in case one is printed on its own.
-      - name: Hide email addresses in logs
+      - name: Hide email addresses and phone number in logs
         env:
           ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          CALLMEBOT_PHONE: ${{ secrets.CALLMEBOT_PHONE }}
         run: |
           for a in $(printf '%s,%s' "$ALERT_EMAIL_TO" "$MAIL_USERNAME" | tr ',' ' '); do
             [ -n "$a" ] && echo "::add-mask::$a"
           done
-          echo "Email addresses masked"
+          # The phone can appear URL-encoded (%2B46...) or as bare digits, so mask the digits too.
+          if [ -n "$CALLMEBOT_PHONE" ]; then
+            digits=$(printf '%s' "$CALLMEBOT_PHONE" | tr -cd '0-9')
+            echo "::add-mask::$CALLMEBOT_PHONE"; echo "::add-mask::$digits"
+          fi
+          echo "Email addresses and phone masked"
 
       - uses: actions/checkout@v5
 
